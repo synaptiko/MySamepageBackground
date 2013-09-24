@@ -1,0 +1,14 @@
+{
+  "name": "My Samepage Background",
+  "version": "1.0",
+  "manifest_version": 2,
+  "description": "Do you want your own background on samepage.io? Here it is!",
+  "content_scripts": [{
+    "matches": ["https://samepage.io/app/*", "http://localhost:8086/debug/*"],
+    "js": ["contentScript.js"]
+  }],
+  "options_page": "options.html",
+  "permissions": [
+    "tabs", "https://samepage.io/", "http://localhost:8086/", "storage"
+  ]
+}
