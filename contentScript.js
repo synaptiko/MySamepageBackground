@@ -1,29 +1,32 @@
 var body = document.body;
-var style, color, url;
+var image = undefined;
 
-chrome.storage.sync.get(['color', 'url'], setBackground);
-chrome.storage.onChanged.addListener(function(changes, namespace) {
-  if (namespace === 'sync') {
-  	setBackground({
-  		color: (changes.color ? changes.color.newValue : color),
-  		url: (changes.url ? changes.url.newValue : url)
-  	});
-  }
-});
+injectScriptInPage("document.body.setAttribute('data-dock-enabled', kerio.lib.Settings.isFeatureFlag('dockEnabled'))");
+if (document.body.dataset.dockEnabled === 'true') { // data attribute supports only string values
+	chrome.storage.local.get(['image'], setBackground);
+	chrome.storage.onChanged.addListener(function(changes, namespace) {
+		if (namespace === 'local') {
+			setBackground({
+				image: (changes.image ? changes.image.newValue : image)
+			});
+		}
+	});
+}
 
 function setBackground(storage) {
-	style = [];
-	style.push('background: none');
+	var style = [];
 
-	color = storage.color;
-	style.push('background-color: ' + (color || '#fff'));
-
-	url = storage.url || '';
-	if (url !== '') {
-		style.push('background-image: url(' + url + ')');
-		style.push('background-repeat: no-repeat');
+	if (storage.hasOwnProperty('image') && storage.image && storage.image.length > 0) {
+		style.push('background: white url(' + storage.image + ') center center no-repeat');
 		style.push('background-size: cover');
-	}
 
-	body.setAttribute('style', style.join(';'));
+		body.setAttribute('style', style.join(';'));
+	}
+}
+
+function injectScriptInPage(code) {
+	var script = document.createElement('script');
+	script.textContent = code;
+	(document.head || document.documentElement).appendChild(script);
+	script.parentNode.removeChild(script);
 }
